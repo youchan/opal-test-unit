@@ -1,9 +1,13 @@
-require "opal/test/unit/version"
+require "opal"
 
 module Opal
   module Test
     module Unit
-      # Your code goes here...
+
     end
   end
 end
+
+require_relative "unit/assertions"
+require_relative "unit/result_printer"
+require_relative "unit/test_case"
