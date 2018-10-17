@@ -27,10 +27,15 @@ module Opal::Test::Unit
       end
     end
 
-
     def assert_equal(expected, actual, message="")
       unless expected == actual
         raise AssertFailed.new(expected, actual, message)
+      end
+    end
+
+    def assert_kind_of(klass, object, message="")
+      unless object.kind_of?(klass)
+        raise AssertFailed.new(klass, object.class, message)
       end
     end
 

@@ -1,2 +1,4 @@
 require "bundler/gem_tasks"
-task :default => :spec
+require "opal/test/unit/rake_task"
+
+Opal::Test::Unit::RakeTask.new(:default, File.expand_path("../test", __FILE__))
