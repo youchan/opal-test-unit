@@ -9,10 +9,24 @@ module Opal::Test::Unit
       subclass.define_singleton_method(:test) do |desc, &block|
         TestCase.register_test subclass, OpenStruct.new({ desc: desc, block: block })
       end
+
+      subclass.define_singleton_method(:setup) do |&block|
+        TestCase.register_setup subclass, OpenStruct.new({ block: block })
+      end
     end
 
     def self.register_test(subclass, test)
       ((@tests ||= {})[subclass] ||= []) << test
+    end
+
+    def self.register_setup(subclass, setup)
+      ((@setups ||= {})[subclass] ||= []) << setup
+    end
+
+    def self.setup(setups)
+      setups.each do |setup|
+        setup.block.call
+      end
     end
 
     def self.run
@@ -21,16 +35,21 @@ module Opal::Test::Unit
       errors = []
       @test_cases&.each do |test_case|
         instance = test_case.new
+
         @tests[test_case]&.each do |test|
-          print("\e[32m")
           begin
+            if @setups&.has_key?(test_case)
+              self.setup(@setups[test_case])
+            end
+
+            print("\e[32m")
             instance.instance_eval(&test.block)
             print "."
             success_count += 1
           rescue AssertFailed => e
             print "\e[31mF\e[32m"
             failure_messages << OpenStruct.new({ desc: test.desc, error: e })
-          rescue => e
+          rescue Exception => e
             print "\e[31mE\e[32m"
             errors << OpenStruct.new({ desc: test.desc, error: e })
           end

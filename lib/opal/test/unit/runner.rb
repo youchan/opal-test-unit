@@ -17,11 +17,24 @@ module Opal::Test::Unit
         end
         tmpfile.write(<<~SRC)
           require "opal/platform"
-          result = Opal::Test::Unit::TestCase.run
-          Opal::Test::Unit::ResultPrinter.print_summary(result)
-          if result.failure_messages.count > 0 || result.errors.count > 0
-            raise 'exit 1'
+
+          run_test = Proc.new do
+            result = Opal::Test::Unit::TestCase.run
+
+            Opal::Test::Unit::ResultPrinter.print_summary(result)
+            if result.failure_messages.count > 0 || result.errors.count > 0
+              exit 1
+            end
           end
+
+          %x(
+            var isNode = (typeof process !== "undefined" && typeof require !== "undefined");
+            if (isNode) {
+              run_test();
+            } else {
+              window.onload = run_test;
+            }
+          )
         SRC
       end
       run_on_opal @directory, tmpfile_path

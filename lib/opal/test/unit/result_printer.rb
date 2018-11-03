@@ -13,7 +13,11 @@ module Opal::Test::Unit
         puts "\e[33m" + error.desc + "\e[37m"
         print "\e[31m"
         puts error.error.message
-        puts error.error.backtrace
+        if error.error.backtrace.is_a?(Array)
+          puts error.error.backtrace.join("\n")
+        else
+          puts error.error.backtrace
+        end
         puts "\e[37m"
       end
 
